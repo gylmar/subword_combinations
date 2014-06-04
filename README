@@ -1,0 +1,73 @@
+Author: Gylmar Moreno
+Date: 01/29/14
+
+This program takes a word file and prints out the two longest 
+words that are a direct combination of other words in
+the file. 
+
+We accomplish this by building a character tree, starting
+with a root node symbolized by an accept state character not
+found in the character set of our input file.
+
+(Note the 'accept state character' can be changed in the header file
+if one were to change the alphabet of the words in file.)
+
+We create a path of character nodes using each file word, beginning from 
+the root and ending at the root. For example, adding the word "abr" would 
+create a path "root"->"a"->"b"->"r"->"root"
+
+These paths are later traversed and branched by later additions
+that share substrings. For example, adding "abra" to our previous example
+would first traverse the path "root"->"a"->"b"->"r" , but at
+the "r" node we would add an "a" child for a total of two children
+at node "h" (including the root). Similarly adding "cad" would 
+create a new path starting at root: "root"->"c"->"a"->"d"->"root."
+
+Note that we add the root to the end of each word to form a cycle. Each cycle
+iteration indicates the concatination of the string already traversed and
+whatever words we find concatinated in our substring.
+
+Finding a path back to root allows us to branch our search, which is
+the secret to finding every possible combination from the given word list
+at each given substring. For example, let us add the word "abraabra" and
+the two sample words above to create an example graph. 
+"abraabra" is composed of "abra" and "abra", so we traverse the graph
+using the characters that compose it to indicate where we walk and
+where we branch our search. (Graph sample below)
+
+            -----<----<------<-----<----<----<-----|
+            |               |                      ^
+            |               ^                      |
+            v               |                      ^
+         "root"->"a"->"b"->"r"                     |
+            |               |                      ^
+            |               v                      |
+            v              "a"->"a"->"b"->"r"->"a"-|
+            |               |                      ^
+            v               --->---->---->----->---|
+            |                                      ^
+            --->"c"->"a"->"d"---->---->----->------|
+
+A search for the word would involve traversing "abr" from the root first,
+where we branch our search using substring "aabra"
+on the root and "abra" on node "a" (remember that removing an "a" from 
+"aabra" signifies our traversal to that character).
+
+The root search eventually finds the substring "aabra" to be invalid as there
+is no path that walks down that specific order of characters so this particular 
+instance of the search returns 0.
+
+We continue down the "a" path, which branches to another "a" node
+with substring "bra" and a root path with substring "abra."
+In this case, both strings eventually end at a valid endpoint (and another
+invalid return when we hit the "r" node again). Ultimately, this branch ends up
+returning 0 + 1 + 1.
+
+Ultimately we sum the values for all our branched searches (0+0+1+1 in this case)
+and obtain 2, the number of subword combinations found for "abraabra", one being
+the original string itself and the other our "abra" "abra" concatenation.
+We only consider a return value greater than 1 to belong to an accepted string
+as every string is a length-wise combination of itself.
+
+This implementation assumes the words are 
+sorted, lower-case, and limited to one word per line. 
